@@ -29,6 +29,7 @@ instructions/
 | [utils/review.md](utils/review.md) | CTO視点でのコードレビュー指示書。一貫性・可読性・スケーラビリティの観点でレビューし、指摘と称賛を含むレポートを生成する |
 | [utils/create-docs.md](utils/create-docs.md) | 新機能の要件定義・設計書・タスクリストを生成するフィーチャープランニング指示書（ツール非依存版） |
 | [utils/fix-from-review.md](utils/fix-from-review.md) | レビューレポートの指摘を分類し、要件定義書・設計書・タスクリストに反映するレビュー修正指示書（ツール非依存版） |
+| [utils/clean-commits.md](utils/clean-commits.md) | 差分を保証しながらコミット履歴を整理する指示書。バックアップ・ハッシュ検証・ロールバック手順を含む |
 
 ### claude/（Claude Code 固有）
 
