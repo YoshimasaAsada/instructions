@@ -14,15 +14,24 @@ AIへの指示書（プロンプト・ガイドライン）を一元管理する
 instructions/
 ├── README.md         # このファイル（インデックス）
 ├── CLAUDE.md         # Claude Code 向け運用ルール
-└── utils/            # 汎用ユーティリティ系指示書
+├── utils/            # 汎用指示書（どのAIツールでも利用可能）
+├── claude/           # Claude Code 固有の指示書
+└── copilot/          # GitHub Copilot 固有の指示書
 ```
 
 ## Index
 
 <!-- INDEX_START -->
+### utils/（汎用）
+
 | ファイル | 説明 |
 |----------|------|
 | [utils/review.md](utils/review.md) | CTO視点でのコードレビュー指示書。一貫性・可読性・スケーラビリティの観点でレビューし、指摘と称賛を含むレポートを生成する |
-| [utils/create-docs.md](utils/create-docs.md) | 新機能の要件定義・設計書・タスクリストを自動生成するフィーチャープランニング指示書 |
-| [utils/fix-from-review.md](utils/fix-from-review.md) | レビューレポートの指摘を分類し、要件定義書・設計書・タスクリストに反映するレビュー修正指示書 |
+
+### claude/（Claude Code 固有）
+
+| ファイル | 説明 |
+|----------|------|
+| [claude/create-docs.md](claude/create-docs.md) | 新機能の要件定義・設計書・タスクリストを自動生成するフィーチャープランニング指示書 |
+| [claude/fix-from-review.md](claude/fix-from-review.md) | レビューレポートの指摘を分類し、要件定義書・設計書・タスクリストに反映するレビュー修正指示書 |
 <!-- INDEX_END -->
