@@ -22,11 +22,17 @@ instructions/
 ## Index
 
 <!-- INDEX_START -->
+### ルート/（共通）
+
+| ファイル | 説明 |
+|----------|------|
+| [base-CLAUDE.md](base-CLAUDE.md) | 各プロジェクトに `CLAUDE.md` を導入するためのベーステンプレートと運用ルール集 |
+
 ### utils/（汎用）
 
 | ファイル | 説明 |
 |----------|------|
-| [utils/review.md](utils/review.md) | CTO視点でのコードレビュー指示書。一貫性・可読性・スケーラビリティの観点でレビューレポートを生成する |
+| [utils/review.md](utils/review.md) | CTO視点で問題点を優先度別に整理し、修正案と確認方法まで提示するコードレビュー指示書 |
 | [utils/create-docs.md](utils/create-docs.md) | 新機能の要件定義書・設計書・タスクリストを生成するフィーチャープランニング指示書 |
 | [utils/fix-from-review.md](utils/fix-from-review.md) | レビュー指摘を分類し、要件定義書・設計書・タスクリストに反映するレビュー修正指示書 |
 | [utils/clean-commits.md](utils/clean-commits.md) | 差分を保証しながらコミット履歴を整理する指示書。バックアップ・ハッシュ検証・ロールバック手順を含む |
