@@ -37,6 +37,7 @@ instructions/
 | [utils/fix-from-review.md](utils/fix-from-review.md) | レビュー指摘を分類し、要件定義書・設計書・タスクリストに反映するレビュー修正指示書 |
 | [utils/clean-commits.md](utils/clean-commits.md) | 差分を保証しながらコミット履歴を整理する指示書。バックアップ・ハッシュ検証・ロールバック手順を含む |
 | [utils/create-pr.md](utils/create-pr.md) | 差分とコミット履歴からPR説明文を生成する指示書 |
+| [utils/create-test-code.md](utils/create-test-code.md) | 変更仕様に沿ってテスト観点を抽出し、壊れにくいテストコードを作成する指示書 |
 | [utils/review-loop.md](utils/review-loop.md) | レビュー→修正→再レビューを指摘ゼロになるまで繰り返すループ指示書 |
 | [utils/scaffold-from-spec.md](utils/scaffold-from-spec.md) | 設計書（spec.md）からスキャフォールドコードを生成する指示書 |
 | [utils/refactor.md](utils/refactor.md) | 責務分離・重複排除・可読性改善のリファクタリング分析・提案指示書 |
