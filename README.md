@@ -34,7 +34,7 @@ instructions/
 |----------|------|
 | [utils/clean-commits.md](utils/clean-commits.md) | 差分同一性を保証しながらコミット履歴を安全に整理する指示書 |
 | [utils/create-adr.md](utils/create-adr.md) | 技術的意思決定をADR形式で背景・選択肢・理由とともに記録する指示書 |
-| [utils/create-docs.md](utils/create-docs.md) | 新機能の要件定義書・設計書・タスクリストを生成するフィーチャープランニング指示書 |
+| [utils/create-docs.md](utils/create-docs.md) | 未確定事項確認と根拠明記を徹底し、要件定義書・設計書・タスクリストを生成する指示書 |
 | [utils/create-onboarding.md](utils/create-onboarding.md) | コードベース調査をもとに新メンバー向けオンボーディングガイドを作成する指示書 |
 | [utils/create-pr.md](utils/create-pr.md) | 差分とコミット履歴からPR説明文を構造化して生成する指示書 |
 | [utils/create-test-code.md](utils/create-test-code.md) | 仕様ベースでテスト観点を抽出し壊れにくいテストコードを作成する指示書 |
