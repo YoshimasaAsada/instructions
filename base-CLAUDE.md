@@ -39,7 +39,7 @@
 | テスト生成 | `utils/generate-tests.md` | 「テストを書いて」「テストケースを作って」 |
 | デバッグ | `utils/debug.md` | 「バグを調べて」「エラーの原因を特定して」 |
 | 型レビュー | `utils/type-review.md` | 「型を見直して」「any を潰して」 |
-| スキャフォールド生成 | `utils/scaffold-from-spec.md` | 「spec.md から実装して」「スキャフォールドを作って」 |
+| スキャフォールド生成 | `spec-to-code/scaffold-from-spec.md` | 「spec.md から実装して」「スキャフォールドを作って」 |
 | コミット整理 | `utils/clean-commits.md` | 「コミットを整理して」「squash して」 |
 | PR作成 | `utils/create-pr.md` | 「PRを作って」「PR説明文を書いて」 |
 | 影響範囲分析 | `utils/impact-analysis.md` | 「影響範囲を調べて」「依存関係を確認して」 |

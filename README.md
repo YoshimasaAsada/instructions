@@ -28,6 +28,15 @@ instructions/
 |----------|------|
 | [base-CLAUDE.md](base-CLAUDE.md) | 各プロジェクトへ `CLAUDE.md` を導入するためのベーステンプレートと運用ルール集 |
 
+### spec-to-code/（AI自動開発パイプライン）
+
+| ファイル | 説明 |
+|----------|------|
+| [spec-to-code/create-spec.md](spec-to-code/create-spec.md) | 要件テキストから固定フォーマットの仕様書を生成する指示書 |
+| [spec-to-code/review-spec.md](spec-to-code/review-spec.md) | 仕様書をレビューしVERDICT自動判定ブロック付きの指摘レポートを生成する指示書 |
+| [spec-to-code/fix-spec-from-review.md](spec-to-code/fix-spec-from-review.md) | レビュー指摘を仕様書に反映して修正する指示書 |
+| [spec-to-code/scaffold-from-spec.md](spec-to-code/scaffold-from-spec.md) | 設計書（spec.md）に沿って実装順序どおりに雛形コードを生成する指示書 |
+
 ### utils/（汎用）
 
 | ファイル | 説明 |
@@ -46,7 +55,6 @@ instructions/
 | [utils/refactor.md](utils/refactor.md) | 振る舞いを変えずに責務分離・重複排除・可読性改善を進める指示書 |
 | [utils/review.md](utils/review.md) | 根拠コードを添えて優先度別に指摘するCTO視点のコードレビュー指示書 |
 | [utils/review-loop.md](utils/review-loop.md) | レビュー→修正→再レビューを指摘ゼロまで反復するワンストップ指示書 |
-| [utils/scaffold-from-spec.md](utils/scaffold-from-spec.md) | 設計書（spec.md）に沿って実装順序どおりに雛形コードを生成する指示書 |
 | [utils/type-review.md](utils/type-review.md) | any/unknownなど型安全性の問題を検出し改善案を提示する型レビュー指示書 |
 
 ### claude/（Claude Code 固有）

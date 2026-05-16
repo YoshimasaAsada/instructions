@@ -59,10 +59,11 @@ git diff HEAD
 
 | ディレクトリ | 用途 |
 |------------|------|
-| `utils/`   | 汎用指示書（どのAIツールでも利用可能なもの） |
-| `claude/`  | Claude Code 固有の指示書（Explore エージェント等 Claude の機能に依存するもの） |
-| `copilot/` | GitHub Copilot 固有の指示書 |
-| `domains/` | ドメイン・業務知識系の指示書 |
+| `utils/`     | 汎用指示書（どのAIツールでも利用可能なもの） |
+| `claude/`    | Claude Code 固有の指示書（Explore エージェント等 Claude の機能に依存するもの） |
+| `copilot/`   | GitHub Copilot 固有の指示書 |
+| `domains/`   | ドメイン・業務知識系の指示書 |
+| `spec-to-code/` | AI自動開発パイプライン（仕様書作成→レビュー→修正→実装を全自動化） |
 
 新しいカテゴリが必要な場合は上記テーブルにも追記すること。
 
