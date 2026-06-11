@@ -14,6 +14,58 @@ Slackの要望を人間がClaude Codeへ貼り付けた後、以下をClaude Cod
 
 Slack APIとの連携は行いません。
 
+## フロー
+
+```mermaid
+flowchart TD
+    A["Slackの要望を手動でコピー"] --> B["Claude Codeで<br/>/feature-harness:develop-feature を実行"]
+    B --> C["要望保存・リポジトリ調査"]
+
+    C --> R1["要件定義を作成・修正"]
+    R1 --> R2["要件レビュー"]
+    R2 --> R3{"判定"}
+    R3 -- "NEEDS_REVISION" --> R1
+    R3 -- "NEEDS_USER_INPUT" --> U1["ユーザーが判断事項へ回答"]
+    U1 --> R1
+    R3 -- "5回で未承認" --> X["ブロック状態を保存して停止"]
+    R3 -- "APPROVED" --> D1["技術設計を作成・修正"]
+
+    D1 --> D2["設計レビュー"]
+    D2 --> D3{"判定"}
+    D3 -- "NEEDS_REVISION" --> D1
+    D3 -- "NEEDS_USER_INPUT" --> U2["ユーザーが判断事項へ回答"]
+    U2 --> D1
+    D3 -- "5回で未承認" --> X
+    D3 -- "APPROVED" --> T1["実装タスクリストを作成・修正"]
+
+    T1 --> T2["タスクリストレビュー"]
+    T2 --> T3{"判定"}
+    T3 -- "NEEDS_REVISION" --> T1
+    T3 -- "NEEDS_USER_INPUT" --> U3["ユーザーが判断事項へ回答"]
+    U3 --> T1
+    T3 -- "5回で未承認" --> X
+    T3 -- "APPROVED" --> G["文書ゲート検証"]
+
+    G -- "失敗" --> X
+    G -- "成功" --> H{"人間による実装承認"}
+    H -- "保留・却下" --> S["承認待ちで停止"]
+    H -- "承認" --> I["タスク順に実装・テスト追加"]
+    I --> V["format / lint / typecheck / test / build"]
+    V -- "修正可能な失敗" --> I
+    V -- "解消不能" --> X
+    V -- "成功" --> Z["実装レポート作成・完了"]
+
+    X -. "/feature-harness:resume-feature" .-> Y["status.mdのPHASEから<br/>該当工程へ復帰"]
+    S -. "/feature-harness:resume-feature" .-> Y
+    Y -. "requirements" .-> R1
+    Y -. "design" .-> D1
+    Y -. "tasks" .-> T1
+    Y -. "approval" .-> H
+```
+
+各文書の作成者とレビュアーは別サブエージェントです。途中で停止した場合も、
+成果物と `status.md` をもとに再開できます。
+
 ## 特徴
 
 - 作成者とレビュアーを別サブエージェントに分離
