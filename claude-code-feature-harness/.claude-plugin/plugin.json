@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "feature-harness",
+  "displayName": "Feature Development Harness",
+  "version": "0.1.0",
+  "description": "Turns a manually pasted Slack request into reviewed requirements, design, tasks, and implementation.",
+  "author": {
+    "name": "AI Instructions Repository Contributors"
+  },
+  "keywords": [
+    "requirements",
+    "design",
+    "planning",
+    "implementation",
+    "review-loop"
+  ]
+}

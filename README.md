@@ -12,11 +12,13 @@ AIへの指示書（プロンプト・ガイドライン）を一元管理する
 
 ```
 instructions/
-├── README.md         # このファイル（インデックス）
-├── CLAUDE.md         # Claude Code 向け運用ルール
-├── utils/            # 汎用指示書（どのAIツールでも利用可能）
-├── claude/           # Claude Code 固有の指示書
-└── copilot/          # GitHub Copilot 固有の指示書
+├── README.md                    # このファイル（インデックス）
+├── CLAUDE.md                    # Claude Code 向け運用ルール
+├── utils/                       # 汎用指示書
+├── claude/                      # Claude Code 固有の指示書
+├── spec-to-code/                # 自動開発パイプライン
+├── claude-code-feature-harness/ # 対話型機能開発ハーネス
+└── cmux-ai-formation/           # CMUX 作業環境構築
 ```
 
 ## Index
@@ -36,6 +38,29 @@ instructions/
 | [spec-to-code/review-spec.md](spec-to-code/review-spec.md) | 仕様書をレビューしVERDICT自動判定ブロック付きの指摘レポートを生成する指示書 |
 | [spec-to-code/fix-spec-from-review.md](spec-to-code/fix-spec-from-review.md) | レビュー指摘を仕様書に反映して修正する指示書 |
 | [spec-to-code/scaffold-from-spec.md](spec-to-code/scaffold-from-spec.md) | 設計書（spec.md）に沿って実装順序どおりに雛形コードを生成する指示書 |
+| [spec-to-code/roles/orchestrator.md](spec-to-code/roles/orchestrator.md) | PRD作成から実装・検証・レビュー修正までを統括するオーケストレーター定義 |
+| [spec-to-code/roles/pm.md](spec-to-code/roles/pm.md) | 要件テキストから検証可能なPRDを作成するProduct Managerロール |
+| [spec-to-code/roles/tech-lead.md](spec-to-code/roles/tech-lead.md) | PRDの実現可能性をレビューしてアーキテクチャを設計するTech Leadロール |
+| [spec-to-code/roles/backend-engineer.md](spec-to-code/roles/backend-engineer.md) | API・DB・ビジネスロジックを実ファイルへ実装するBackend Engineerロール |
+| [spec-to-code/roles/frontend-engineer.md](spec-to-code/roles/frontend-engineer.md) | UI・状態管理・API連携を実ファイルへ実装するFrontend Engineerロール |
+| [spec-to-code/roles/qa-engineer.md](spec-to-code/roles/qa-engineer.md) | 受け入れ条件のテスト追加とカバレッジ判定を行うQA Engineerロール |
+| [spec-to-code/roles/security-reviewer.md](spec-to-code/roles/security-reviewer.md) | OWASP Top 10を中心に実装差分を評価するSecurity Reviewerロール |
+| [spec-to-code/roles/code-reviewer.md](spec-to-code/roles/code-reviewer.md) | 検証・QA・セキュリティ結果を含めて総合判定するCode Reviewerロール |
+
+### claude-code-feature-harness/（対話型機能開発）
+
+| ファイル | 説明 |
+|----------|------|
+| [claude-code-feature-harness/skills/develop-feature/SKILL.md](claude-code-feature-harness/skills/develop-feature/SKILL.md) | Slackから手動貼り付けした要望を要件・設計・タスク・実装へ進めるClaude Code Skill |
+| [claude-code-feature-harness/skills/develop-feature/workflow.md](claude-code-feature-harness/skills/develop-feature/workflow.md) | 各文書のレビュー反復、承認ゲート、実装までの状態遷移を定義するワークフロー |
+| [claude-code-feature-harness/skills/resume-feature/SKILL.md](claude-code-feature-harness/skills/resume-feature/SKILL.md) | 保存された状態と成果物から機能開発ハーネスを再開するClaude Code Skill |
+| [claude-code-feature-harness/agents/requirements-analyst.md](claude-code-feature-harness/agents/requirements-analyst.md) | 要望と指摘から検証可能な要件定義書を作成・修正するサブエージェント |
+| [claude-code-feature-harness/agents/requirements-reviewer.md](claude-code-feature-harness/agents/requirements-reviewer.md) | 要件の矛盾・漏れ・曖昧さ・検証可能性を独立評価するサブエージェント |
+| [claude-code-feature-harness/agents/system-designer.md](claude-code-feature-harness/agents/system-designer.md) | 承認済み要件と既存コードから技術設計を作成・修正するサブエージェント |
+| [claude-code-feature-harness/agents/design-reviewer.md](claude-code-feature-harness/agents/design-reviewer.md) | 技術設計を要件とリポジトリ制約に照らして独立評価するサブエージェント |
+| [claude-code-feature-harness/agents/task-planner.md](claude-code-feature-harness/agents/task-planner.md) | 承認済み要件・設計から依存関係順の実装タスクを作るサブエージェント |
+| [claude-code-feature-harness/agents/task-reviewer.md](claude-code-feature-harness/agents/task-reviewer.md) | タスクの網羅性・順序・実現可能性・検証可能性を独立評価するサブエージェント |
+| [claude-code-feature-harness/agents/implementation-engineer.md](claude-code-feature-harness/agents/implementation-engineer.md) | 人間承認後にタスクを実装しテスト・検証するサブエージェント |
 
 ### utils/（汎用）
 
@@ -63,4 +88,12 @@ instructions/
 |----------|------|
 | [claude/create-docs.md](claude/create-docs.md) | Exploreエージェントを活用して要件定義・設計書・タスクリストを作成する指示書 |
 | [claude/fix-from-review.md](claude/fix-from-review.md) | review結果を3文書に反映するClaude Code向けレビュー修正ワークフロー指示書 |
+| [claude/statusline-setup.md](claude/statusline-setup.md) | コンテキストと5時間・7日制限をプログレスバー表示するステータスライン設定 |
+
+### cmux-ai-formation/（CMUX作業環境）
+
+| ファイル | 説明 |
+|----------|------|
+| [cmux-ai-formation/cmux-ai-coding-formation-instructions.md](cmux-ai-formation/cmux-ai-coding-formation-instructions.md) | CMUX上へAI・Git・ファイル・Markdown確認ペインを配置する運用手順 |
+| [cmux-ai-formation/cmux-ai-coding-tools.md](cmux-ai-formation/cmux-ai-coding-tools.md) | CMUXを中心としたAIコーディング環境の推奨ツールと設定一覧 |
 <!-- INDEX_END -->

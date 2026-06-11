@@ -1,25 +1,30 @@
 #!/usr/bin/env bash
-# AI自動開発パイプライン
-# 使い方: ./pipeline.sh <requirements.txt> [--name NAME] [--max-loops N] [--output-dir DIR] [--target-dir DIR]
+# spec-to-code エージェントチームパイプライン
+# 使い方: ./pipeline.sh <requirements.txt> [--name NAME] [--min-loops N] [--max-loops N] [--output-dir DIR] [--target-dir DIR] [--verify-cmd CMD]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROLES_DIR="$SCRIPT_DIR/roles"
 
 # --- デフォルト値 ---
 NAME="feature"
+MIN_LOOPS=2
 MAX_LOOPS=3
 OUTPUT_DIR="./output"
 TARGET_DIR="."
+VERIFY_CMD="auto"
 REQUIREMENTS_FILE=""
 
 # --- 引数パース ---
 while [[ $# -gt 0 ]]; do
   case $1 in
     --name)       NAME="$2";        shift 2 ;;
+    --min-loops)  MIN_LOOPS="$2";   shift 2 ;;
     --max-loops)  MAX_LOOPS="$2";   shift 2 ;;
     --output-dir) OUTPUT_DIR="$2";  shift 2 ;;
     --target-dir) TARGET_DIR="$2";  shift 2 ;;
+    --verify-cmd) VERIFY_CMD="$2";  shift 2 ;;
     -*)           echo "Unknown option: $1" >&2; exit 2 ;;
     *)            REQUIREMENTS_FILE="$1"; shift ;;
   esac
@@ -27,7 +32,7 @@ done
 
 if [[ -z "$REQUIREMENTS_FILE" ]]; then
   echo "Error: requirements ファイルを指定してください。" >&2
-  echo "使い方: $0 <requirements.txt> [--name NAME] [--max-loops N]" >&2
+  echo "使い方: $0 <requirements.txt> [--name NAME] [--min-loops N] [--max-loops N] [--verify-cmd CMD]" >&2
   exit 2
 fi
 
@@ -36,85 +41,73 @@ if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
   exit 2
 fi
 
+if ! [[ "$MIN_LOOPS" =~ ^[0-9]+$ && "$MAX_LOOPS" =~ ^[0-9]+$ ]]; then
+  echo "Error: --min-loops と --max-loops は数値で指定してください。" >&2
+  exit 2
+fi
+
+if (( MIN_LOOPS > MAX_LOOPS )); then
+  echo "Error: --min-loops は --max-loops 以下にしてください。" >&2
+  exit 2
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
-SPEC_FILE="$OUTPUT_DIR/${NAME}.spec.md"
-REVIEW_FILE="$OUTPUT_DIR/${NAME}.review.md"
+REQUIREMENTS_FILE="$(cd "$(dirname "$REQUIREMENTS_FILE")" && pwd)/$(basename "$REQUIREMENTS_FILE")"
+OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd)"
+TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
 
-log() { echo "[pipeline] $*"; }
+# オーケストレーター（Claude）を起動し、対象リポジトリ内で実装・検証・レビュー修正を反復させる
+cd "$TARGET_DIR"
+claude -p \
+  --add-dir "$OUTPUT_DIR" \
+  --allowedTools "Agent,Task,TodoWrite,Read,Write,Edit,MultiEdit,Bash,Grep,Glob,LS" \
+  "$(cat "$ROLES_DIR/orchestrator.md")
 
-# -------------------------------------------------------------------
-# Phase 1: 仕様書作成
-# -------------------------------------------------------------------
-log "Phase 1: 仕様書を作成しています..."
+# 設定
 
-claude -p "$(cat "$SCRIPT_DIR/create-spec.md")
+- 成果物プレフィックス（{name}）: $NAME
+- 最低実装レビュー反復回数（{min_loops}）: $MIN_LOOPS
+- 最大ループ回数（{max_loops}）: $MAX_LOOPS
+- 出力ディレクトリ（{output_dir}）: $OUTPUT_DIR
+- 実装対象ディレクトリ: $TARGET_DIR
+- 検証コマンド（{verify_cmd}）: $VERIFY_CMD
+
+# チームメンバーの役割定義
+
+## PM
+
+$(cat "$ROLES_DIR/pm.md")
+
+## Tech Lead
+
+$(cat "$ROLES_DIR/tech-lead.md")
+
+## Backend Engineer
+
+$(cat "$ROLES_DIR/backend-engineer.md")
+
+## Frontend Engineer
+
+$(cat "$ROLES_DIR/frontend-engineer.md")
+
+## QA Engineer
+
+$(cat "$ROLES_DIR/qa-engineer.md")
+
+## Security Reviewer
+
+$(cat "$ROLES_DIR/security-reviewer.md")
+
+## Code Reviewer
+
+$(cat "$ROLES_DIR/code-reviewer.md")
 
 # 要件
 
-$(cat "$REQUIREMENTS_FILE")" > "$SPEC_FILE"
+$(cat "$REQUIREMENTS_FILE")"
 
-log "仕様書を生成しました: $SPEC_FILE"
-
-# -------------------------------------------------------------------
-# Phase 2-3: レビュー → 修正ループ
-# -------------------------------------------------------------------
-LOOP=0
-while [[ $LOOP -lt $MAX_LOOPS ]]; do
-  LOOP=$((LOOP + 1))
-  log "Phase 2: レビュー実行中... (ループ $LOOP/$MAX_LOOPS)"
-
-  claude -p "$(cat "$SCRIPT_DIR/review-spec.md")
-
-# レビュー対象仕様書
-
-$(cat "$SPEC_FILE")" > "$REVIEW_FILE"
-
-  # VERDICT を抽出
-  VERDICT=$(grep -m1 "^VERDICT:" "$REVIEW_FILE" | awk '{print $2}' || true)
-
-  if [[ "$VERDICT" == "APPROVED" ]]; then
-    log "レビュー承認: APPROVED"
-    break
-  fi
-
-  if [[ $LOOP -ge $MAX_LOOPS ]]; then
-    log "警告: 最大ループ回数 ($MAX_LOOPS) に達しました。残存指摘が残っています。"
-    echo ""
-    echo "--- 残存指摘 ---"
-    grep -A1 "指摘件数:" "$REVIEW_FILE" || true
-    exit 1
-  fi
-
-  log "Phase 3: 仕様書を修正しています... (ループ $LOOP)"
-
-  REVISED=$(claude -p "$(cat "$SCRIPT_DIR/fix-spec-from-review.md")
-
-# 現在の仕様書
-
-$(cat "$SPEC_FILE")
-
-# レビュー結果
-
-$(cat "$REVIEW_FILE")")
-
-  echo "$REVISED" > "$SPEC_FILE"
-  log "仕様書を更新しました: $SPEC_FILE"
-done
-
-# -------------------------------------------------------------------
-# Phase 4: 実装
-# -------------------------------------------------------------------
-log "Phase 4: 実装を開始しています..."
-
-cd "$TARGET_DIR"
-claude -p "$(cat "$SCRIPT_DIR/scaffold-from-spec.md")
-
-# 仕様書
-
-$(cat "$SPEC_FILE")"
-
-log "完了しました。"
-log "  仕様書:       $SPEC_FILE"
-log "  レビュー結果: $REVIEW_FILE"
-log "  実装先:       $TARGET_DIR"
+SUMMARY_FILE="$OUTPUT_DIR/${NAME}.summary.md"
+if [[ -f "$SUMMARY_FILE" ]] && grep -q "ステータス: INCOMPLETE" "$SUMMARY_FILE"; then
+  exit 1
+fi
