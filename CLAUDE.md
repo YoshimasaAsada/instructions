@@ -64,6 +64,7 @@ git diff HEAD
 | `copilot/`   | GitHub Copilot 固有の指示書 |
 | `domains/`   | ドメイン・業務知識系の指示書 |
 | `spec-to-code/` | AI自動開発パイプライン（仕様書作成→レビュー→修正→実装を全自動化） |
+| `skills/`    | Claude Code カスタムスキルの原本ミラー（`~/.claude/skills/` と同期。他PCへ持ち運ぶための正本） |
 
 新しいカテゴリが必要な場合は上記テーブルにも追記すること。
 
@@ -73,8 +74,25 @@ git diff HEAD
 - GitHub Copilot の機能（`@workspace`、`/` コマンドなど）に言及している → `copilot/`
 - 特定ツールに依存せず、どのAIにそのまま貼り付けて使える → `utils/`
 
+## skills/ の同期ルール
+
+`skills/` は `~/.claude/skills/` にあるカスタムスキルの**原本をそのままミラー**したもの。
+他PCでも同じスキルを使えるようにするための正本として管理する。
+
+- **形式は原本のまま**。frontmatter 付き `SKILL.md`（＋ `template.md` 等の付属ファイル）を改変せずに置く。指示書化（frontmatter 除去）はしない。
+- **正は `~/.claude/skills/` 側**。ローカルでスキルを更新したら `skills/` へ反映する（`cp -R` でコピーし、`diff -r` が空になる＝完全一致を確認する）。
+- **他PCでの利用手順:** リポジトリを clone 後、`skills/<name>` を `~/.claude/skills/` へコピー（または symlink）する。README の「カスタムスキルの利用」を参照。
+
 ## 指示書ファイルの書き方
 
 - 先頭に `# Instruction` または役割名の見出しを置く
 - 出力形式が決まっている場合はテンプレートを末尾に記載する
 - 言語は日本語・英語どちらでも可
+
+## プロジェクト固有ルール
+
+- 業務ルールに関わる値は `schema.prisma` に `default(...)` を置かない。
+- `default` が必要な場合でも、DB スキーマには残さず migration.sql で一時的にだけ使う。
+- 移行時は `default` 付与 → backfill → `default` 解除 の順に進める。
+- 最終的に Prisma schema は、アプリが必ず設定する前提の状態だけを表現する。
+- 文字列状態やステータスなど、業務上の意味を持つ値はアプリ側で明示設定する。

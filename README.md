@@ -16,10 +16,26 @@ instructions/
 ├── CLAUDE.md                    # Claude Code 向け運用ルール
 ├── utils/                       # 汎用指示書
 ├── claude/                      # Claude Code 固有の指示書
+├── skills/                      # Claude Code カスタムスキル原本（~/.claude/skills/ のミラー）
 ├── spec-to-code/                # 自動開発パイプライン
 ├── claude-code-feature-harness/ # 対話型機能開発ハーネス
 └── cmux-ai-formation/           # CMUX 作業環境構築
 ```
+
+## カスタムスキルの利用（他PCでの再現）
+
+`skills/` には Claude Code のカスタムスキル（`~/.claude/skills/` の内容）を原本のままミラーしています。
+別のPCで同じスキルを使うには、clone 後に各スキルを `~/.claude/skills/` へ配置します。
+
+```bash
+# コピーする場合
+cp -R skills/* ~/.claude/skills/
+
+# もしくは symlink で常に最新へ追従させる場合（例）
+for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; done
+```
+
+スキルをローカルで更新したら `skills/` 側へ反映し、`diff -r ~/.claude/skills/<name> skills/<name>` が空（完全一致）であることを確認してからコミットします。
 
 ## Index
 
@@ -29,6 +45,16 @@ instructions/
 | ファイル | 説明 |
 |----------|------|
 | [base-CLAUDE.md](base-CLAUDE.md) | 各プロジェクトへ `CLAUDE.md` を導入するためのベーステンプレートと運用ルール集 |
+
+### skills/（Claude Code カスタムスキル原本）
+
+| ファイル | 説明 |
+|----------|------|
+| [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
+| [skills/feature-planning/SKILL.md](skills/feature-planning/SKILL.md) | 新機能の要件から要件定義書・設計書・タスクリストの3文書を生成するスキル |
+| [skills/requirements-definition/SKILL.md](skills/requirements-definition/SKILL.md) | コードで裏取りし確認事項を既定案付きで列挙する正式な要件定義書を作成するスキル |
+| [skills/requirements-definition/template.md](skills/requirements-definition/template.md) | requirements-definition スキルが使う要件定義書テンプレート |
+| [skills/requirements-definition-draft/SKILL.md](skills/requirements-definition-draft/SKILL.md) | 雑な依頼やSlackメモを壁打ちしながら要件整理メモに分解するスキル |
 
 ### spec-to-code/（AI自動開発パイプライン）
 
@@ -80,7 +106,6 @@ instructions/
 | [utils/refactor.md](utils/refactor.md) | 振る舞いを変えずに責務分離・重複排除・可読性改善を進める指示書 |
 | [utils/review.md](utils/review.md) | 根拠コードを添えて優先度別に指摘するCTO視点のコードレビュー指示書 |
 | [utils/review-loop.md](utils/review-loop.md) | レビュー→修正→再レビューを指摘ゼロまで反復するワンストップ指示書 |
-| [utils/type-review.md](utils/type-review.md) | any/unknownなど型安全性の問題を検出し改善案を提示する型レビュー指示書 |
 
 ### claude/（Claude Code 固有）
 
