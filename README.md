@@ -51,10 +51,11 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 | ファイル | 説明 |
 |----------|------|
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
-| [skills/feature-planning/SKILL.md](skills/feature-planning/SKILL.md) | 新機能の要件から要件定義書・設計書・タスクリストの3文書を生成するスキル |
+| [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書と既存コードをもとに実装可能な技術設計書を自律的に作成・更新するスキル |
 | [skills/requirements-definition/SKILL.md](skills/requirements-definition/SKILL.md) | コードで裏取りし確認事項を既定案付きで列挙する正式な要件定義書を作成するスキル |
 | [skills/requirements-definition/template.md](skills/requirements-definition/template.md) | requirements-definition スキルが使う要件定義書テンプレート |
 | [skills/requirements-definition-draft/SKILL.md](skills/requirements-definition-draft/SKILL.md) | 雑な依頼やSlackメモを壁打ちしながら要件整理メモに分解するスキル |
+| [skills/task-breakdown/SKILL.md](skills/task-breakdown/SKILL.md) | 技術設計書を依存関係順の検証可能な実装タスクリストへ自律的に分解するスキル |
 
 ### spec-to-code/（AI自動開発パイプライン）
 
