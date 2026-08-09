@@ -1,0 +1,23 @@
+{
+  "skill_name": "implement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "docs/features/candidate-memo.task.md を実装して。requirement と spec も同じディレクトリにあります。",
+      "expected_output": "task.md のタスクが依存順に実装され、各タスクの Status が [x] に更新される。rspec / rubocop（Ruby変更時）や pnpm checkup 相当（フロント変更時）が全て通り、レビューサイクルの結果（採用/不採用の指摘）がサマリで報告される。コードコメントに REQ-xxx / TASK-xxx が含まれない。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "タスクリストに沿って実装を進めてください。途中の TASK-003 まで終わっている状態です。",
+      "expected_output": "ブランチ名・会話から *.task.md を自動探索し、Status が [x] のタスクをスキップして未完了タスクから再開する。完了ごとに task.md を更新する。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "実装よろしく。レビューで出た指摘は全部直さなくていいので、プロジェクトの方針に合うものだけ対応して。",
+      "expected_output": "レビュー指摘を CLAUDE.md / .claude/rules / 既存慣例と突き合わせ、採用・不採用を理由つきで判定し、採用分のみ修正してCIを全通過させる。不採用の理由がサマリに含まれる。",
+      "files": []
+    }
+  ]
+}

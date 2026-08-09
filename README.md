@@ -54,11 +54,13 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
 | [skills/create-branch-worktree/SKILL.md](skills/create-branch-worktree/SKILL.md) | 既存ブランチのworktreeを安全に作成または再利用し、Visual Studio Codeで開くスキル |
 | [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書と既存コードをもとに実装可能な技術設計書を自律的に作成・更新するスキル |
-| [skills/implement/SKILL.md](skills/implement/SKILL.md) | 実装タスクリストに沿ってタスクを実装し、CI相当チェック全通過とレビューサイクル収束まで繰り返すスキル |
+| [skills/implement/SKILL.md](skills/implement/SKILL.md) | タスクリストまたは単発の修正依頼を、CI相当チェック全通過とレビューサイクル収束まで繰り返して実装するスキル |
 | [skills/requirements-definition/SKILL.md](skills/requirements-definition/SKILL.md) | コードで裏取りし確認事項を既定案付きで列挙する正式な要件定義書を作成するスキル |
 | [skills/requirements-definition/template.md](skills/requirements-definition/template.md) | requirements-definition スキルが使う要件定義書テンプレート |
 | [skills/requirements-definition-draft/SKILL.md](skills/requirements-definition-draft/SKILL.md) | 雑な依頼やSlackメモを壁打ちしながら要件整理メモに分解するスキル |
 | [skills/task-breakdown/SKILL.md](skills/task-breakdown/SKILL.md) | 技術設計書を依存関係順の検証可能な実装タスクリストへ自律的に分解するスキル |
+| [skills/test-case-doc/SKILL.md](skills/test-case-doc/SKILL.md) | 要件・設計・実装をもとにテスト技法で網羅的なテストケース一覧を作成・更新するスキル |
+| [skills/test-case-review/SKILL.md](skills/test-case-review/SKILL.md) | 既存テストケース文書を要件・設計・実装と突き合わせ漏れ・誤りを検出しレビューレポートを作成するスキル |
 
 ### spec-to-code/（AI自動開発パイプライン）
 
