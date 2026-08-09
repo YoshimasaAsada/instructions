@@ -50,6 +50,7 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 
 | ファイル | 説明 |
 |----------|------|
+| [skills/article-draft-pr/SKILL.md](skills/article-draft-pr/SKILL.md) | 雑なメモやチャットログを一般化してObsidian Vaultの技術記事に起こし、コミットしてドラフトPRまで出すスキル |
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
 | [skills/create-branch-worktree/SKILL.md](skills/create-branch-worktree/SKILL.md) | 既存ブランチのworktreeを安全に作成または再利用し、Visual Studio Codeで開くスキル |
 | [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書と既存コードをもとに実装可能な技術設計書を自律的に作成・更新するスキル |
