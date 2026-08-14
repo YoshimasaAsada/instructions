@@ -37,6 +37,8 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 
 スキルをローカルで更新したら `skills/` 側へ反映し、`diff -r ~/.claude/skills/<name> skills/<name>` が空（完全一致）であることを確認してからコミットします。
 
+なお、社内リポジトリ名・環境名・社内運用手順に依存するスキル（現在は `restore-local-db`）は public リポジトリのためミラー対象外です。
+
 ## Index
 
 <!-- INDEX_START -->
@@ -52,13 +54,24 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 |----------|------|
 | [skills/article-draft-pr/SKILL.md](skills/article-draft-pr/SKILL.md) | 雑なメモやチャットログを一般化してObsidian Vaultの技術記事に起こし、コミットしてドラフトPRまで出すスキル |
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
-| [skills/create-branch-worktree/SKILL.md](skills/create-branch-worktree/SKILL.md) | 既存ブランチのworktreeを安全に作成または再利用し、Visual Studio Codeで開くスキル |
-| [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書と既存コードをもとに実装可能な技術設計書を自律的に作成・更新するスキル |
-| [skills/implement/SKILL.md](skills/implement/SKILL.md) | 実装タスクリストに沿ってタスクを実装し、CI相当チェック全通過とレビューサイクル収束まで繰り返すスキル |
+| [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書・プロジェクト規約・既存の類似実装をもとに実装可能な技術設計書を作成・更新するスキル |
+| [skills/design-doc/template.md](skills/design-doc/template.md) | design-doc スキルが使う技術設計書（spec.md）テンプレート |
+| [skills/design-review-doc/SKILL.md](skills/design-review-doc/SKILL.md) | 要件・設計・タスク・テストケースを社内レビュー用の技術設計レビュー文書へ決まった章構成で整形するスキル |
+| [skills/doc-review-cycle/SKILL.md](skills/doc-review-cycle/SKILL.md) | 各文書作成スキルから呼ばれ、渡された観点でレビュー→採否判定→修正→再検証を収束まで回す共通レビューサイクル |
+| [skills/implement/SKILL.md](skills/implement/SKILL.md) | タスクリストや修正依頼を、CI相当チェック全通過とレビューサイクル収束まで繰り返して実装する実装ハーネス |
+| [skills/implement/comment-rules.md](skills/implement/comment-rules.md) | implement スキルのコメント監査で使う、書くべきコメント／書かないコメントの判定リスト |
+| [skills/implement/scope-rules.md](skills/implement/scope-rules.md) | implement スキルの変更範囲判定で使う、依頼外の混入変更を弾くための参照リスト |
+| [skills/implement/followup-template.md](skills/implement/followup-template.md) | implement スキルが見送った改善提案を記録する followup.md テンプレート |
 | [skills/requirements-definition/SKILL.md](skills/requirements-definition/SKILL.md) | コードで裏取りし確認事項を既定案付きで列挙する正式な要件定義書を作成するスキル |
 | [skills/requirements-definition/template.md](skills/requirements-definition/template.md) | requirements-definition スキルが使う要件定義書テンプレート |
 | [skills/requirements-definition-draft/SKILL.md](skills/requirements-definition-draft/SKILL.md) | 雑な依頼やSlackメモを壁打ちしながら要件整理メモに分解するスキル |
+| [skills/requirements-definition-draft/template-extended.md](skills/requirements-definition-draft/template-extended.md) | requirements-definition-draft スキルが整理メモを詳細化するときに使う拡張テンプレート |
+| [skills/skills-map/SKILL.md](skills/skills-map/SKILL.md) | 要件定義〜実装スキル群の工程図と使い分けを表示し、どのスキルから始めるかを案内するルーター |
 | [skills/task-breakdown/SKILL.md](skills/task-breakdown/SKILL.md) | 技術設計書を依存関係順の検証可能な実装タスクリストへ自律的に分解するスキル |
+| [skills/task-breakdown/template.md](skills/task-breakdown/template.md) | task-breakdown スキルが使う実装タスクリスト（task.md）テンプレート |
+| [skills/test-case-doc/SKILL.md](skills/test-case-doc/SKILL.md) | 要件・設計・実装コードからテスト技法で網羅的なテストケース一覧を作成・更新するスキル |
+| [skills/test-case-doc/template.md](skills/test-case-doc/template.md) | test-case-doc スキルが使うテストケース一覧（testcase.md）テンプレート |
+| [skills/test-case-review/SKILL.md](skills/test-case-review/SKILL.md) | 既存テストケースを要件・設計・実装と突き合わせ、漏れや誤りをレビューレポートにまとめるスキル |
 
 ### spec-to-code/（AI自動開発パイプライン）
 
