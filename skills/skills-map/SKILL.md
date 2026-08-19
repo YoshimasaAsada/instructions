@@ -18,6 +18,8 @@ disable-model-invocation: true
   → task-breakdown                  実装タスクリスト（task.md）
   → test-case-doc                   テストケース一覧（testcase.md）
   → implement                       実装・CIループ・2軸レビュー（＋followup.md）
+  → test-prep                       動作確認の準備（環境・データ・URL / testdata.md）
+  → commit-and-pr                   コミット分割・ドラフトPR（大きい変更はスタックPR）
   → design-review-doc               社内レビュー用文書（review.md）
 ```
 
@@ -28,7 +30,10 @@ disable-model-invocation: true
 - バグ・単発の修正依頼（タスクリスト不要） → `implement` の修正モード
 - 対話で要件を詰めたい → `requirements-definition-draft` の壁打ちモード
 - 作成済みテストケースの監査 → `test-case-review`
+- 手で動作確認したいので環境・データ・URLを用意する → `test-prep`
 - 文書のセルフレビューだけ回したい → `doc-review-cycle`
-- コミット履歴の整理・squash → `clean-commits`
+- 実装済みの差分をコミットしてPRを出す → `commit-and-pr`
+- スタックPRの積み直し・レビュー指摘反映後の更新 → `commit-and-pr` の restack モード
+- 既に散らかったコミット履歴の整理・squash → `clean-commits`
 - ローカルDBの復元・reindex → `restore-local-db`
 - メモ・調査ログの記事化とPR → `article-draft-pr`
