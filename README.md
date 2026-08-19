@@ -54,6 +54,9 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 |----------|------|
 | [skills/article-draft-pr/SKILL.md](skills/article-draft-pr/SKILL.md) | 雑なメモやチャットログを一般化してObsidian Vaultの技術記事に起こし、コミットしてドラフトPRまで出すスキル |
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
+| [skills/commit-and-pr/SKILL.md](skills/commit-and-pr/SKILL.md) | 実装済みの差分を論理コミットへ分割し、大きい変更はタスク単位のスタックPRとしてドラフトPRを作成・積み直しするスキル |
+| [skills/commit-and-pr/stack-operations.md](skills/commit-and-pr/stack-operations.md) | commit-and-pr スキルが使うスタックPRの構築・restack・コンフリクト対応の手順集 |
+| [skills/commit-and-pr/pr-template.md](skills/commit-and-pr/pr-template.md) | commit-and-pr スキルがリポジトリのPRテンプレート不在時に使う既定のPR本文テンプレート |
 | [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書・プロジェクト規約・既存の類似実装をもとに実装可能な技術設計書を作成・更新するスキル |
 | [skills/design-doc/template.md](skills/design-doc/template.md) | design-doc スキルが使う技術設計書（spec.md）テンプレート |
 | [skills/design-review-doc/SKILL.md](skills/design-review-doc/SKILL.md) | 要件・設計・タスク・テストケースを社内レビュー用の技術設計レビュー文書へ決まった章構成で整形するスキル |
