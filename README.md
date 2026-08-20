@@ -75,6 +75,8 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 | [skills/test-case-doc/SKILL.md](skills/test-case-doc/SKILL.md) | 要件・設計・実装コードからテスト技法で網羅的なテストケース一覧を作成・更新するスキル |
 | [skills/test-case-doc/template.md](skills/test-case-doc/template.md) | test-case-doc スキルが使うテストケース一覧（testcase.md）テンプレート |
 | [skills/test-case-review/SKILL.md](skills/test-case-review/SKILL.md) | 既存テストケースを要件・設計・実装と突き合わせ、漏れや誤りをレビューレポートにまとめるスキル |
+| [skills/test-prep/SKILL.md](skills/test-prep/SKILL.md) | 検証環境の起動・印つき検証データの投入・実IDを埋めた動作確認URL生成までを行い testdata.md にまとめるスキル |
+| [skills/test-prep/template.md](skills/test-prep/template.md) | test-prep スキルが使う動作確認セット（testdata.md）テンプレート |
 
 ### spec-to-code/（AI自動開発パイプライン）
 
