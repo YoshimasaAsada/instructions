@@ -50,7 +50,7 @@
 
 | 対象 | 環境 | URL |
 |------|------|-----|
-| {{画面・API名}} | 開発 (dev) | {{例: http://in-vision.localhost:8080/candidates/123}} |
+| {{画面・API名}} | 開発 (dev) | {{例: http://localhost:3000/orders/123}} |
 | {{画面・API名}} | 本番 (production) | {{該当すれば}} |
 
 ---

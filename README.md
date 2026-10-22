@@ -24,7 +24,7 @@ instructions/
 
 ## カスタムスキルの利用（他PCでの再現）
 
-`skills/` には Claude Code のカスタムスキル（`~/.claude/skills/` の内容）を原本のままミラーしています。
+`skills/` には Claude Code のカスタムスキル（`~/.claude/skills/` の内容）をミラーしています。public リポジトリのため、原本にある社内固有の名前・パス・番号は汎用的な表現に置き換えてあります。
 別のPCで同じスキルを使うには、clone 後に各スキルを `~/.claude/skills/` へ配置します。
 
 ```bash
@@ -35,9 +35,9 @@ cp -R skills/* ~/.claude/skills/
 for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; done
 ```
 
-スキルをローカルで更新したら `skills/` 側へ反映し、`diff -r ~/.claude/skills/<name> skills/<name>` が空（完全一致）であることを確認してからコミットします。
+スキルをローカルで更新したら `skills/` 側へ反映し、`diff -r ~/.claude/skills/<name> skills/<name>` に残る差分が汎用化した箇所だけであることを確認してからコミットします（手順は `CLAUDE.md` の「skills/ の同期ルール」）。
 
-なお、社内リポジトリ名・環境名・社内運用手順に依存するスキル（現在は `restore-local-db`）は public リポジトリのためミラー対象外です。
+なお、社内の環境名・認証プロファイル・社内運用手順そのものが本体のスキル（現在は `restore-local-db`）は、汎用化すると意味を失うためミラー対象外です。
 
 ## Index
 
@@ -54,27 +54,41 @@ for s in skills/*/; do ln -sfn "$(pwd)/$s" ~/.claude/skills/"$(basename "$s")"; 
 |----------|------|
 | [skills/article-draft-pr/SKILL.md](skills/article-draft-pr/SKILL.md) | 雑なメモやチャットログを一般化してObsidian Vaultの技術記事に起こし、コミットしてドラフトPRまで出すスキル |
 | [skills/clean-commits/SKILL.md](skills/clean-commits/SKILL.md) | フィーチャーブランチのコミットをレイヤー×機能領域で分割し既存scope慣習に沿ってsquash・force pushするスキル |
+| [skills/code-map/SKILL.md](skills/code-map/SKILL.md) | 既存コードの処理を実データの中間値つきでメソッド単位に説明し、自己完結HTMLの図にするスキル |
 | [skills/commit-and-pr/SKILL.md](skills/commit-and-pr/SKILL.md) | 実装済みの差分を論理コミットへ分割し、大きい変更はタスク単位のスタックPRとしてドラフトPRを作成・積み直しするスキル |
 | [skills/commit-and-pr/stack-operations.md](skills/commit-and-pr/stack-operations.md) | commit-and-pr スキルが使うスタックPRの構築・restack・コンフリクト対応の手順集 |
 | [skills/commit-and-pr/pr-template.md](skills/commit-and-pr/pr-template.md) | commit-and-pr スキルがリポジトリのPRテンプレート不在時に使う既定のPR本文テンプレート |
 | [skills/design-doc/SKILL.md](skills/design-doc/SKILL.md) | 要件定義書・プロジェクト規約・既存の類似実装をもとに実装可能な技術設計書を作成・更新するスキル |
 | [skills/design-doc/template.md](skills/design-doc/template.md) | design-doc スキルが使う技術設計書（spec.md）テンプレート |
-| [skills/design-review-doc/SKILL.md](skills/design-review-doc/SKILL.md) | 要件・設計・タスク・テストケースを社内レビュー用の技術設計レビュー文書へ決まった章構成で整形するスキル |
+| [skills/design-review-doc/SKILL.md](skills/design-review-doc/SKILL.md) | 要件・設計・タスクから設計上の論点だけを取り出し、社内レビュー用の技術設計レビュー文書へ決まった章構成で整形するスキル |
+| [skills/diff-map/SKILL.md](skills/diff-map/SKILL.md) | PR・ブランチの差分を処理の流れ順に並べ直し、周辺のデータ・制約・SQLを実データつきで図解する「差分の地図」を作るスキル |
 | [skills/doc-review-cycle/SKILL.md](skills/doc-review-cycle/SKILL.md) | 各文書作成スキルから呼ばれ、渡された観点でレビュー→採否判定→修正→再検証を収束まで回す共通レビューサイクル |
 | [skills/implement/SKILL.md](skills/implement/SKILL.md) | タスクリストや修正依頼を、CI相当チェック全通過とレビューサイクル収束まで繰り返して実装する実装ハーネス |
 | [skills/implement/comment-rules.md](skills/implement/comment-rules.md) | implement スキルのコメント監査で使う、書くべきコメント／書かないコメントの判定リスト |
 | [skills/implement/scope-rules.md](skills/implement/scope-rules.md) | implement スキルの変更範囲判定で使う、依頼外の混入変更を弾くための参照リスト |
 | [skills/implement/followup-template.md](skills/implement/followup-template.md) | implement スキルが見送った改善提案を記録する followup.md テンプレート |
+| [skills/implement/defensive-code-rules.md](skills/implement/defensive-code-rules.md) | implement スキルで到達しない状態へのガード・分岐を書かないための防御コード判定リスト |
+| [skills/implement/visual-check-rules.md](skills/implement/visual-check-rules.md) | implement スキルでデザインがある画面を、幅・表示の分岐ごとにブラウザで確かめる手順 |
+| [skills/nonstop/SKILL.md](skills/nonstop/SKILL.md) | issue や要件メモから要件定義〜実装までを確認待ちなしで一気通貫に進め、決定ログと図入りHTMLで提示するスキル |
+| [skills/nonstop/template.md](skills/nonstop/template.md) | nonstop スキルが仮確定と進捗を記録する決定ログ（decisions.md）テンプレート |
+| [skills/pr-screenshots/SKILL.md](skills/pr-screenshots/SKILL.md) | 見た目が変わるPRに、変更箇所を赤枠で囲んだ変更前後のキャプチャ画像を作って本文に貼るスキル |
 | [skills/requirements-definition/SKILL.md](skills/requirements-definition/SKILL.md) | コードで裏取りし確認事項を既定案付きで列挙する正式な要件定義書を作成するスキル |
 | [skills/requirements-definition/template.md](skills/requirements-definition/template.md) | requirements-definition スキルが使う要件定義書テンプレート |
 | [skills/requirements-definition-draft/SKILL.md](skills/requirements-definition-draft/SKILL.md) | 雑な依頼やSlackメモを壁打ちしながら要件整理メモに分解するスキル |
 | [skills/requirements-definition-draft/template-extended.md](skills/requirements-definition-draft/template-extended.md) | requirements-definition-draft スキルが整理メモを詳細化するときに使う拡張テンプレート |
+| [skills/skill-retro/SKILL.md](skills/skill-retro/SKILL.md) | スキルで進めた作業後のユーザーとのやりとりを抽出し、手戻りの原因と直す場所を分析してスキルへ反映する振り返りスキル |
+| [skills/skill-retro/retro-template.md](skills/skill-retro/retro-template.md) | skill-retro スキルが出力する振り返りレポート（retro.md）テンプレート |
+| [skills/skill-retro/ledger.md](skills/skill-retro/ledger.md) | skill-retro スキルの振り返り履歴と、手戻りパターンの再発回数を積み上げる台帳 |
 | [skills/skills-map/SKILL.md](skills/skills-map/SKILL.md) | 要件定義〜実装スキル群の工程図と使い分けを表示し、どのスキルから始めるかを案内するルーター |
 | [skills/task-breakdown/SKILL.md](skills/task-breakdown/SKILL.md) | 技術設計書を依存関係順の検証可能な実装タスクリストへ自律的に分解するスキル |
 | [skills/task-breakdown/template.md](skills/task-breakdown/template.md) | task-breakdown スキルが使う実装タスクリスト（task.md）テンプレート |
 | [skills/test-case-doc/SKILL.md](skills/test-case-doc/SKILL.md) | 要件・設計・実装コードからテスト技法で網羅的なテストケース一覧を作成・更新するスキル |
 | [skills/test-case-doc/template.md](skills/test-case-doc/template.md) | test-case-doc スキルが使うテストケース一覧（testcase.md）テンプレート |
 | [skills/test-case-review/SKILL.md](skills/test-case-review/SKILL.md) | 既存テストケースを要件・設計・実装と突き合わせ、漏れや誤りをレビューレポートにまとめるスキル |
+| [skills/test-prep/SKILL.md](skills/test-prep/SKILL.md) | ローカルの検証環境を起動し、エッジケースを含む検証データを投入して実ID入りの動作確認URL一覧を出すスキル |
+| [skills/test-prep/template.md](skills/test-prep/template.md) | test-prep スキルが出力する検証データ・確認URL一覧（testdata.md）テンプレート |
+| [skills/test-scenario-from-diff/SKILL.md](skills/test-scenario-from-diff/SKILL.md) | 差分から変更前後の挙動と影響範囲を洗い出し、手動確認用のテストシナリオ一覧を作るスキル |
+| [skills/test-scenario-from-diff/template.md](skills/test-scenario-from-diff/template.md) | test-scenario-from-diff スキルが出力するテストシナリオ一覧（testscenario.md）テンプレート |
 
 ### spec-to-code/（AI自動開発パイプライン）
 

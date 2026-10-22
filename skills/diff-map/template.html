@@ -1,0 +1,313 @@
+<!doctype html>
+<!--
+  差分の地図の雛形。スタイルはそのまま使い、{{...}} と各セクションの中身を書き換える。
+  該当しないセクションは丸ごと消す。SVG の部品は各図のコメントにある例をコピーして使う。
+  実例: 詳細画面のタブにアンケートの回答を表示する PR で作ったものが元になっている。
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>差分の地図 {{#PR番号 または ブランチ}}</title>
+<style>
+  :root {
+    --bg: #f6f7f5; --fg: #1f2328; --muted: #59636e; --card: #ffffff; --border: #d0d7de;
+    --lane: #eef1f4; --edge: #6e7781; --accent: #0969da;
+    --new-bg: #e3f4e8; --new-stroke: #1a7f37;
+    --changed-bg: #fff1dc; --changed-stroke: #bc4c00;
+    --existing-bg: #f3f4f6; --existing-stroke: #8c959f;
+    --mark: #cf222e; --code-bg: #f3f4f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115; --fg: #e6edf3; --muted: #9da7b3; --card: #161b22; --border: #30363d;
+      --lane: #1a1f27; --edge: #8b949e; --accent: #58a6ff;
+      --new-bg: #10301c; --new-stroke: #3fb950;
+      --changed-bg: #33240f; --changed-stroke: #d29922;
+      --existing-bg: #1c2128; --existing-stroke: #6e7681;
+      --mark: #ff7b72; --code-bg: #1c2128;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --fg: #e6edf3; --muted: #9da7b3; --card: #161b22; --border: #30363d;
+    --lane: #1a1f27; --edge: #8b949e; --accent: #58a6ff;
+    --new-bg: #10301c; --new-stroke: #3fb950;
+    --changed-bg: #33240f; --changed-stroke: #d29922;
+    --existing-bg: #1c2128; --existing-stroke: #6e7681;
+    --mark: #ff7b72; --code-bg: #1c2128;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif; font-size: 15px; line-height: 1.7; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 24px; line-height: 1.4; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  p { margin: 8px 0; }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.55; margin: 8px 0; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); margin-right: 6px; }
+  .summary { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-top: 20px; }
+  .summary dl { margin: 0; display: grid; grid-template-columns: 9em 1fr; gap: 6px 16px; }
+  .summary dt { font-weight: 700; }
+  .summary dd { margin: 0; }
+  figure { margin: 16px 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  figcaption { font-weight: 700; margin-bottom: 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  .figscroll { overflow-x: auto; }
+  .figscroll svg { min-width: 910px; }
+  .confirm { margin-top: 12px; border-left: 4px solid var(--accent); background: var(--bg); border-radius: 0 8px 8px 0; padding: 10px 14px; }
+  .confirm b { display: block; font-size: 13px; color: var(--accent); margin-bottom: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 4px 0 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; border: 2px solid; }
+  .legend .l-new::before { background: var(--new-bg); border-color: var(--new-stroke); }
+  .legend .l-changed::before { background: var(--changed-bg); border-color: var(--changed-stroke); }
+  .legend .l-existing::before { background: var(--existing-bg); border-color: var(--existing-stroke); }
+
+  .node rect { stroke-width: 1.5; }
+  .n-new rect { fill: var(--new-bg); stroke: var(--new-stroke); stroke-width: 2.5; }
+  .n-changed rect { fill: var(--changed-bg); stroke: var(--changed-stroke); stroke-width: 2.5; }
+  .n-existing rect { fill: var(--existing-bg); stroke: var(--existing-stroke); }
+  .t-title { font-size: 15px; font-weight: 700; fill: var(--fg); }
+  .t-sub { font-size: 13px; fill: var(--muted); }
+  .t-edge { font-size: 13px; fill: var(--muted); }
+  .t-lane { font-size: 13px; font-weight: 700; fill: var(--muted); }
+  .edge { fill: none; stroke: var(--edge); stroke-width: 1.6; }
+  .arrowhead { fill: var(--edge); }
+  .lane { fill: var(--lane); }
+  .edge-bg { fill: var(--card); }
+
+  .funnel { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin: 6px 0 4px; }
+  .step { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; min-width: 120px; }
+  .step .num { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .step .lbl { font-size: 13px; color: var(--muted); }
+  .arrow { align-self: center; color: var(--muted); }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } .summary dl { grid-template-columns: 1fr; } }
+  .screen { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; min-width: 0; overflow-x: auto; }
+  .screen-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 14px; font-size: 13px; overflow-x: auto; }
+  .tabs span { padding: 4px 10px; color: var(--muted); white-space: nowrap; }
+  .tabs .active { color: var(--fg); font-weight: 700; border-bottom: 2px solid var(--fg); }
+  .sec-head { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; margin: 2px 0 8px; }
+  .placeholder { border: 1px dashed var(--border); border-radius: 8px; padding: 14px; color: var(--muted); font-size: 13px; text-align: center; }
+  .newmark { border: 2px solid var(--mark); border-radius: 8px; padding: 8px; margin-top: 18px; position: relative; }
+  .newmark .tag { position: absolute; top: -11px; right: 10px; background: var(--mark); color: #fff; font-size: 11px; font-weight: 700; padding: 0 8px; border-radius: 999px; line-height: 20px; white-space: nowrap; }
+
+  .bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin: 8px 0 4px; font-size: 12px; font-weight: 700; }
+  .bar div { display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+  .bar .logic { background: var(--new-bg); color: var(--fg); }
+  .bar .test { background: var(--changed-bg); color: var(--fg); }
+  .bar .gen { background: var(--existing-bg); color: var(--muted); }
+  .table-wrap { overflow-x: auto; }
+  .table-wrap table { min-width: 640px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--card); border-radius: 8px; overflow: hidden; }
+  th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+  th { font-size: 13px; color: var(--muted); font-weight: 700; background: var(--bg); }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .need { font-weight: 700; white-space: nowrap; }
+  .kind { display: inline-block; font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 999px; line-height: 18px; border: 1.5px solid; white-space: nowrap; }
+  .kind.k-new { background: var(--new-bg); border-color: var(--new-stroke); }
+  .kind.k-existing { background: var(--existing-bg); border-color: var(--existing-stroke); color: var(--muted); }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+  .sql-sum { margin: 8px 0 12px; }
+  .sql-sum li { margin: 4px 0; }
+
+  .qa { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+  .qa .q { font-weight: 700; }
+  .qa .q::before { content: "Q. "; color: var(--accent); }
+  .qa .a { margin-top: 4px; }
+  ul.facts { padding-left: 20px; }
+  ul.facts li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+  <p class="meta"><span class="badge">差分の地図</span>PR を読む前に読む1枚</p>
+  <h1>{{#PR番号 タイトル}}</h1>
+  <p class="meta">
+    <a href="{{PRのURL}}">PR #{{番号}}</a>（Issue #{{番号}}）・{{base またはマージコミット}}・
+    数字は{{開発DB（ステージングのダンプ）}}で {{YYYY-MM-DD}} に実行して取得
+  </p>
+
+  <section class="summary">
+    <dl>
+      <dt>何が変わったか</dt>
+      <dd>{{利用者から見た変化を1〜2文。何ができるようになった / 何が変わった}}</dd>
+      <dt>変更の中心</dt>
+      <dd>{{BE・FE それぞれの中心となる変更。差分 N 行のうち、読む必要があるのは約 M 行}}</dd>
+      <dt>今のデータで見えるもの</dt>
+      <dd>{{実データで確かめた結果。テストデータしかない場合はそう書く}}</dd>
+    </dl>
+  </section>
+
+  <h2>1. 変更前 → 変更後</h2>
+  <!-- 画面が変わる場合: 変更前・変更後を簡易に再現し、追加・変更部分を .newmark で囲む。
+       画面が無い場合: API の入出力や挙動の違いを表または <pre> で並べる。 -->
+  <div class="compare">
+    <div class="screen">
+      <div class="screen-title">変更前</div>
+      <div class="placeholder">{{変更前の画面・挙動}}</div>
+    </div>
+    <div class="screen">
+      <div class="screen-title">変更後</div>
+      <div class="placeholder">{{変わらない部分}}</div>
+      <div class="newmark">
+        <span class="tag">追加</span>
+        {{追加・変更された部分。表示値は実データと実際の整形関数の出力にそろえる}}
+      </div>
+    </div>
+  </div>
+  <p class="meta">{{表示に使った実データの id、日付表示の基準日、確認するフルパスの URL}}</p>
+
+  <h2>2. {{データ}}はどこから来るのか（周辺）</h2>
+  <p>{{差分に出てこない、データが作られる流れを1〜2文で}}</p>
+  <figure>
+    <figcaption>図1　{{周辺の流れ}}</figcaption>
+    <div class="legend"><span class="l-new">今回追加</span><span class="l-existing">既存</span></div>
+    <div class="figscroll">
+    <svg viewBox="0 0 980 230" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="{{図の説明}}">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <!-- 部品の例（左→右のパイプライン。ノード高さ64、タイトル y+24、サブ y+47）
+      <path class="edge" d="M160,118 H194" marker-end="url(#arw)"/>
+      <path class="edge" d="M778,118 H796 V46 H812" marker-end="url(#arw)"/>   分岐は折れ線で、同じ始点から出す
+      <g class="node n-existing"><rect x="10" y="86" width="150" height="64" rx="8"/>
+        <text x="85" y="110" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="85" y="133" text-anchor="middle" class="t-sub">{{補足・コード名}}</text></g>
+      <g class="node n-new">…</g>   今回追加したノード
+      -->
+    </svg>
+    </div>
+    <div class="confirm">
+      <b>ここで確定すること（{{どのDBの}}件数）</b>
+      <div class="funnel">
+        <div class="step"><div class="num">{{件数}}</div><div class="lbl">{{段階}}</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="num">{{件数}}</div><div class="lbl">{{段階}}</div></div>
+      </div>
+      {{件数から言えること。テストデータかどうか、本番が未確認かどうか}}
+    </div>
+  </figure>
+
+  <h2>3. {{入口}}から{{DB}}まで（今回の変更）</h2>
+  <figure>
+    <figcaption>図2　{{入口}}から DB まで</figcaption>
+    <div class="legend"><span class="l-new">新規</span><span class="l-changed">変更</span><span class="l-existing">既存</span></div>
+    <div class="figscroll">
+    <svg viewBox="0 0 980 330" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="{{図の説明}}">
+      <defs>
+        <marker id="arw2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <rect class="lane" x="0" y="0" width="980" height="104" rx="6"/>
+      <rect class="lane" x="0" y="110" width="980" height="104" rx="6"/>
+      <rect class="lane" x="0" y="220" width="980" height="104" rx="6"/>
+      <text x="16" y="56" class="t-lane">画面（FE）</text>
+      <text x="16" y="166" class="t-lane">API（BE）</text>
+      <text x="16" y="276" class="t-lane">DB</text>
+      <!-- 部品の例（ノードは階段状に置く: FE の右端 → 下の BE → 右 → 下の DB。ノード高さ60、タイトル y+23、サブ y+45）
+      <path class="edge" d="M560,82 V130" marker-end="url(#arw2)"/>
+      <rect class="edge-bg" x="502" y="96" width="116" height="22" rx="4"/>   エッジラベルの下地（幅は文字数から）
+      <text x="560" y="112" text-anchor="middle" class="t-edge">GraphQL query</text>
+      <g class="node n-changed"><rect x="110" y="22" width="240" height="60" rx="8"/>
+        <text x="230" y="45" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="230" y="67" text-anchor="middle" class="t-sub">{{ファイル名（新規/変更/既存）}}</text></g>
+      -->
+    </svg>
+    </div>
+    <div class="confirm">
+      <b>ここで確定すること（実際の入出力）</b>
+      {{実データで実行した結果。分岐ごとに1例ずつ}}
+<pre>{{レスポンスや戻り値。長い本文は省略して文字数を添える}}</pre>
+    </div>
+  </figure>
+
+  <h3>DBアクセスの要約（図2の「SQL N本」の中身）</h3>
+  <ul class="sql-sum">
+    <li><b>いつ発行されるか：</b>{{きっかけと頻度。lazyMount・fetchPolicy・ジョブのスケジュールをコードで確かめて書く}}</li>
+    <li><b>重さ：</b>{{索引・実行時間・全カラム読み込み・件数に比例する N+1 の有無}}</li>
+    <li><b>今回の差分が直接発行するのは {{#}} だけ。</b>{{残りが何のために出るか}}</li>
+  </ul>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>何のために</th><th>テーブルと条件</th><th>件数・索引</th><th>発行元</th></tr></thead>
+    <tbody>
+      <tr><td class="n">①</td><td>{{目的}}<br><span class="kind k-new">今回追加</span> <code>{{フィールド・メソッド}}</code></td><td><code>{{table}}</code><br>{{条件。前の SQL とのつながり}}</td><td>{{N行（全 約M行）}}<br>{{索引}}</td><td><code>{{file:line}}</code></td></tr>
+      <tr><td class="n">②</td><td>{{目的}}<br><span class="kind k-existing">既存</span> <code>{{フィールド・メソッド}}</code></td><td><code>{{table}}</code><br>{{条件}}</td><td>{{件数・索引}}</td><td><code>{{file:line}}</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <details>
+    <summary>実際の SQL と実行計画を見る</summary>
+<pre>{{sql_capture.rb の出力を整形したもの}}</pre>
+  </details>
+
+  <figure>
+    <figcaption>図3　{{出し分け}}</figcaption>
+    <div class="figscroll">
+    <svg viewBox="0 0 980 250" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="{{図の説明}}">
+      <defs>
+        <marker id="arw3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <!-- 部品の例（左に1ノード、右に分岐先を縦に並べる。分岐の折れ点は x=400、ラベルは x=480）
+      <path class="edge" d="M340,125 H400 V40 H558" marker-end="url(#arw3)"/>
+      <rect class="edge-bg" x="430" y="29" width="100" height="22" rx="4"/>
+      <text x="480" y="45" text-anchor="middle" class="t-edge">{{条件}}</text>
+      -->
+    </svg>
+    </div>
+    <div class="confirm">
+      <b>ここで確定すること</b>
+      {{各分岐を通るデータの件数。今のデータで通らない分岐があればそう書く}}
+    </div>
+  </figure>
+
+  <h2>4. 差分の読み方（ファイル別）</h2>
+  <div class="bar">
+    <div class="logic" style="width:{{ロジック%}}%">ロジック {{N}}行</div>
+    <div class="test" style="width:{{テスト%}}%">テスト {{N}}行</div>
+    <div class="gen" style="width:{{生成物%}}%">生成物 {{N}}行</div>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>ファイル</th><th>行</th><th>役割</th><th>読み方</th></tr></thead>
+    <tbody>
+      <tr><td><code>{{ファイル}}</code></td><td class="n">+{{N}}</td><td>{{役割。図のどこに当たるか}}</td><td><span class="need">◎ {{読む行範囲}}</span><br>{{コピーならコピー元と差分}}</td></tr>
+      <tr><td>生成物 {{N}}ファイル</td><td class="n">+{{N}}</td><td><code>just codegen</code> の出力</td><td><span class="need">× 読まない</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>5. セルフレビューで浮かびそうな疑問</h2>
+  <div class="qa"><div class="q">{{疑問}}</div>
+    <div class="a">{{答え。根拠の file:line を添える}}</div></div>
+
+  <h2>6. 周辺で知っておくこと（コードから読み取りにくい事実）</h2>
+  <ul class="facts">
+    <li><b>{{見出し}}：</b>{{事実と根拠}}</li>
+  </ul>
+
+  <h2>7. 気づいた点（直していない）</h2>
+  <ul class="facts">
+    <li>{{気づいた点。PR の範囲外ならそう書く}}</li>
+  </ul>
+
+  <h2>根拠</h2>
+  <p class="meta">
+    実行したスクリプト：{{パス}}<br>
+    読んだコード：{{差分の外で読んだファイル}}
+  </p>
+</main>
+</body>
+</html>
