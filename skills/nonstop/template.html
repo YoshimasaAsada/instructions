@@ -1,0 +1,454 @@
+<!doctype html>
+<!--
+  ノンストップの地図の雛形。スタイルはそのまま使い、{{...}} と各セクションの中身を書き換える。
+  該当しないセクション（覆った仮確定・停止した論点・画面の比較など）は丸ごと消す。
+  SVG の部品は各図の中にある実例をそのまま形として使い、ラベル・座標・ノード数だけ変える。
+  実例: 詳細画面のタブ内で特定のアンケートを上に出し、未回答なら非表示にする issue の実行結果から作ったもの。
+  描き方の決めごと（インライン SVG・viewBox・実表示 12px 以上・線を交差させない・エッジラベルに下地・1枚あたりノード 5〜6 個）は code-map の Phase 4 に従う。
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ノンストップの地図 {{#issue番号}}</title>
+<style>
+  :root {
+    --bg: #f6f7f5; --fg: #1f2328; --muted: #59636e; --card: #ffffff; --border: #d0d7de;
+    --lane: #eef1f4; --edge: #6e7781; --accent: #0969da;
+    --new-bg: #e3f4e8; --new-stroke: #1a7f37;
+    --changed-bg: #fff1dc; --changed-stroke: #bc4c00;
+    --existing-bg: #f3f4f6; --existing-stroke: #8c959f;
+    --mark: #cf222e; --code-bg: #f3f4f6; --warn-bg: #ffebe9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115; --fg: #e6edf3; --muted: #9da7b3; --card: #161b22; --border: #30363d;
+      --lane: #1a1f27; --edge: #8b949e; --accent: #58a6ff;
+      --new-bg: #10301c; --new-stroke: #3fb950;
+      --changed-bg: #33240f; --changed-stroke: #d29922;
+      --existing-bg: #1c2128; --existing-stroke: #6e7681;
+      --mark: #ff7b72; --code-bg: #1c2128; --warn-bg: #3a1d1d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --fg: #e6edf3; --muted: #9da7b3; --card: #161b22; --border: #30363d;
+    --lane: #1a1f27; --edge: #8b949e; --accent: #58a6ff;
+    --new-bg: #10301c; --new-stroke: #3fb950;
+    --changed-bg: #33240f; --changed-stroke: #d29922;
+    --existing-bg: #1c2128; --existing-stroke: #6e7681;
+    --mark: #ff7b72; --code-bg: #1c2128; --warn-bg: #3a1d1d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif; font-size: 15px; line-height: 1.7; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 24px; line-height: 1.4; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  p { margin: 8px 0; }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.55; margin: 8px 0; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); margin-right: 6px; }
+  .summary { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-top: 20px; }
+  .summary dl { margin: 0; display: grid; grid-template-columns: 9em 1fr; gap: 6px 16px; }
+  .summary dt { font-weight: 700; }
+  .summary dd { margin: 0; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+  .tile { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; min-width: 110px; }
+  .tile .num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .tile .lbl { font-size: 12px; color: var(--muted); }
+  .tile.warn { background: var(--warn-bg); border-color: var(--mark); }
+  .tile.ok { background: var(--new-bg); border-color: var(--new-stroke); }
+  .next { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .next li { background: var(--card); border: 1.5px solid var(--accent); border-radius: 999px; padding: 2px 12px; font-size: 14px; }
+  .next li.warn { border-color: var(--mark); background: var(--warn-bg); font-weight: 700; }
+  figure { margin: 16px 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  figcaption { font-weight: 700; margin-bottom: 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  .figscroll { overflow-x: auto; }
+  .figscroll svg { min-width: 910px; }
+  .confirm { margin-top: 12px; border-left: 4px solid var(--accent); background: var(--bg); border-radius: 0 8px 8px 0; padding: 10px 14px; }
+  .confirm b { display: block; font-size: 13px; color: var(--accent); margin-bottom: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 4px 0 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; border: 2px solid; }
+  .legend .l-new::before { background: var(--new-bg); border-color: var(--new-stroke); }
+  .legend .l-changed::before { background: var(--changed-bg); border-color: var(--changed-stroke); }
+  .legend .l-existing::before { background: var(--existing-bg); border-color: var(--existing-stroke); }
+  .doclinks { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin-top: 8px; }
+
+  .node rect { stroke-width: 1.5; }
+  .n-new rect, .n-done rect { fill: var(--new-bg); stroke: var(--new-stroke); stroke-width: 2.5; }
+  .n-changed rect, .n-wip rect { fill: var(--changed-bg); stroke: var(--changed-stroke); stroke-width: 2.5; }
+  .n-existing rect, .n-todo rect { fill: var(--existing-bg); stroke: var(--existing-stroke); }
+  .t-title { font-size: 15px; font-weight: 700; fill: var(--fg); }
+  .t-sub { font-size: 13px; fill: var(--muted); }
+  .t-edge { font-size: 13px; fill: var(--muted); }
+  .t-lane { font-size: 13px; font-weight: 700; fill: var(--muted); }
+  .edge { fill: none; stroke: var(--edge); stroke-width: 1.6; }
+  .arrowhead { fill: var(--edge); }
+  .lane { fill: var(--lane); }
+  .edge-bg { fill: var(--card); }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } .summary dl { grid-template-columns: 1fr; } }
+  .screen { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; min-width: 0; overflow-x: auto; }
+  .screen-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 14px; font-size: 13px; overflow-x: auto; }
+  .tabs span { padding: 4px 10px; color: var(--muted); white-space: nowrap; }
+  .tabs .active { color: var(--fg); font-weight: 700; border-bottom: 2px solid var(--fg); }
+  .sec-head { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; margin: 2px 0 8px; }
+  .placeholder { border: 1px dashed var(--border); border-radius: 8px; padding: 14px; color: var(--muted); font-size: 13px; text-align: center; }
+  .cardmock { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+  .cardmock .t { font-weight: 700; }
+  .newmark { border: 2px solid var(--mark); border-radius: 8px; padding: 8px; margin-top: 18px; position: relative; }
+  .newmark .tag { position: absolute; top: -11px; right: 10px; background: var(--mark); color: #fff; font-size: 11px; font-weight: 700; padding: 0 8px; border-radius: 999px; line-height: 20px; white-space: nowrap; }
+  .gap { font-size: 11px; color: var(--muted); text-align: center; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); margin: 6px 0; }
+
+  .table-wrap { overflow-x: auto; }
+  .table-wrap table { min-width: 640px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--card); border-radius: 8px; overflow: hidden; }
+  th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+  th { font-size: 13px; color: var(--muted); font-weight: 700; background: var(--bg); }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kind { display: inline-block; font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 999px; line-height: 18px; border: 1.5px solid; white-space: nowrap; }
+  .kind.k-new { background: var(--new-bg); border-color: var(--new-stroke); }
+  .kind.k-changed { background: var(--changed-bg); border-color: var(--changed-stroke); }
+  .kind.k-existing { background: var(--existing-bg); border-color: var(--existing-stroke); color: var(--muted); }
+  .kind.k-auto { background: var(--new-bg); border-color: var(--new-stroke); }
+  .kind.k-manual { background: var(--changed-bg); border-color: var(--changed-stroke); }
+  .kind.k-d { background: var(--code-bg); border-color: var(--border); }
+  .kind.k-warn { background: var(--warn-bg); border-color: var(--mark); }
+  .bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin: 8px 0 4px; font-size: 12px; font-weight: 700; }
+  .bar div { display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+  .bar .auto { background: var(--new-bg); color: var(--fg); }
+  .bar .manual { background: var(--changed-bg); color: var(--fg); }
+
+  .matrix td.hit { background: var(--new-bg); text-align: center; }
+  .matrix td.miss { color: var(--muted); text-align: center; }
+  .matrix td.hd { font-weight: 700; }
+  .matrix th { text-align: center; }
+  .matrix th:first-child { text-align: left; }
+  .matrix td .why { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+
+  .dcard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+  .dcard.warn { border-color: var(--mark); border-width: 2px; }
+  .dcard .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .dcard .id { font-weight: 700; font-size: 15px; }
+  .dcard .q { font-weight: 700; margin-top: 4px; }
+  .dcard .q::before { content: "論点 "; color: var(--accent); font-size: 12px; }
+  .dcard .pick { margin-top: 2px; }
+  .dcard .pick::before { content: "採用 "; color: var(--new-stroke); font-size: 12px; font-weight: 700; }
+  .dcard .why { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .dcard .redo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; }
+  .dcard .redo .lbl { color: var(--muted); margin-right: 4px; }
+  .strip { display: inline-flex; gap: 2px; }
+  .strip span { font-size: 11px; padding: 0 6px; line-height: 18px; border: 1px solid var(--border); color: var(--muted); background: var(--bg); }
+  .strip span:first-child { border-radius: 4px 0 0 4px; }
+  .strip span:last-child { border-radius: 0 4px 4px 0; }
+  .strip span.redo { background: var(--changed-bg); border-color: var(--changed-stroke); color: var(--fg); font-weight: 700; }
+  .dcard .redo .what { color: var(--muted); }
+
+  ul.facts { padding-left: 20px; }
+  ul.facts li { margin: 6px 0; }
+  .urls li { margin: 6px 0; }
+  .urls code { font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="meta"><span class="badge">ノンストップの地図</span>文書を開く前に読む1枚</p>
+  <h1>#{{issue番号}} {{issue タイトル}}</h1>
+  <p class="meta">
+    <a href="{{issue の URL}}">issue #{{番号}}</a>・
+    ブランチ <code>{{ブランチ名}}</code>・
+    停止指定{{なし / 設計まで / PRまで}}・{{YYYY-MM-DD}} に{{実装まで完走 / 設計で停止}}・ユーザー未承認の仮確定 {{N}}件
+  </p>
+
+  <section class="summary">
+    <dl>
+      <dt>何を作ったか</dt>
+      <dd>{{利用者から見た変化を1〜2文。続けて「変更は FE の2ファイル＋テスト1本で、BE・DB は触っていない」のように触った範囲を1文}}</dd>
+      <dt>どこまで進んだか</dt>
+      <dd>
+        <!-- 数字のタイル。ok = 良い状態、warn = 人が動く必要がある状態、無印 = 事実 -->
+        <div class="tiles">
+          <div class="tile ok"><div class="num">{{完了した工程数}} / 5</div><div class="lbl">工程 完了</div></div>
+          <div class="tile ok"><div class="num">pass</div><div class="lbl">{{CI相当チェックの名前}}</div></div>
+          <div class="tile"><div class="num">{{N}}</div><div class="lbl">仮確定 D-n</div></div>
+          <div class="tile{{ ⚠️ が1件でもあれば warn}}"><div class="num">{{N}}</div><div class="lbl">⚠️ 止まる条件に触れた</div></div>
+          <div class="tile"><div class="num">{{N}}</div><div class="lbl">覆った / 停止した</div></div>
+          <div class="tile warn"><div class="num">未</div><div class="lbl">手動確認（M-1〜M-{{N}}）</div></div>
+        </div>
+      </dd>
+      <dt>次にやること</dt>
+      <dd>
+        <!-- warn = 人の判断・合意が要るもの（⚠️ 付きの仮確定、記録上未合意の相手がいる D-n）を先頭に -->
+        <ul class="next">
+          <li class="warn">{{D-n の採用案を誰と合意するか}}</li>
+          <li>M-1〜M-{{N}} を手で確認する（<code>test-prep</code>）</li>
+          <li>コミット・PR（<code>commit-and-pr</code>）</li>
+          <li>覆すなら「D-n は別案で」と番号で言う</li>
+        </ul>
+      </dd>
+    </dl>
+  </section>
+
+  <h2>1. 工程の進み方と、どこで何を決めたか</h2>
+  <figure>
+    <figcaption>図1　{{完了した工程数}}工程{{すべて}}完了。仮確定は{{要件定義で3件、技術設計で1件}}</figcaption>
+    <div class="legend"><span class="l-new">完了</span><span class="l-changed">進行中</span><span class="l-existing">未着手</span></div>
+    <div class="figscroll">
+    <!-- 5ノード固定。状態は n-done / n-wip / n-todo。3行目にその工程で生まれた D-n を並べる（無ければ「仮確定なし」）。
+         2行目は工程の規模（FR 件数・変更ファイル数・TASK 本数・自動/手動の件数・CI の結果）。文字数が 174px に収まらなければ短くする -->
+    <svg viewBox="0 0 980 120" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="要件定義から実装までの5工程の進捗">
+      <defs>
+        <marker id="arw1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <path class="edge" d="M184,58 H202" marker-end="url(#arw1)"/>
+      <path class="edge" d="M376,58 H394" marker-end="url(#arw1)"/>
+      <path class="edge" d="M568,58 H586" marker-end="url(#arw1)"/>
+      <path class="edge" d="M760,58 H778" marker-end="url(#arw1)"/>
+      <g class="node n-done"><rect x="10" y="16" width="174" height="84" rx="8"/>
+        <text x="97" y="44" text-anchor="middle" class="t-title">要件定義</text>
+        <text x="97" y="66" text-anchor="middle" class="t-sub">{{v1.2・FR 5件}}</text>
+        <text x="97" y="86" text-anchor="middle" class="t-sub">{{D-1 D-2 D-3}}</text></g>
+      <g class="node n-done"><rect x="202" y="16" width="174" height="84" rx="8"/>
+        <text x="289" y="44" text-anchor="middle" class="t-title">技術設計</text>
+        <text x="289" y="66" text-anchor="middle" class="t-sub">{{変更 2・新規 1 ファイル}}</text>
+        <text x="289" y="86" text-anchor="middle" class="t-sub">{{D-4}}</text></g>
+      <g class="node n-done"><rect x="394" y="16" width="174" height="84" rx="8"/>
+        <text x="481" y="44" text-anchor="middle" class="t-title">タスク分解</text>
+        <text x="481" y="66" text-anchor="middle" class="t-sub">{{TASK 1本（分割なし）}}</text>
+        <text x="481" y="86" text-anchor="middle" class="t-sub">{{仮確定なし}}</text></g>
+      <g class="node n-done"><rect x="586" y="16" width="174" height="84" rx="8"/>
+        <text x="673" y="44" text-anchor="middle" class="t-title">テストケース</text>
+        <text x="673" y="66" text-anchor="middle" class="t-sub">{{自動 4・手動 7}}</text>
+        <text x="673" y="86" text-anchor="middle" class="t-sub">{{仕様の穴なし}}</text></g>
+      <g class="node n-done"><rect x="778" y="16" width="192" height="84" rx="8"/>
+        <text x="874" y="44" text-anchor="middle" class="t-title">実装</text>
+        <text x="874" y="66" text-anchor="middle" class="t-sub">{{checkup 全 pass}}</text>
+        <text x="874" y="86" text-anchor="middle" class="t-sub">{{レビュー収束・手動確認は未}}</text></g>
+    </svg>
+    </div>
+    <!-- 各工程の文書への file:// リンク（絶対パス）。地図が入口で、文書は詳細 -->
+    <div class="doclinks">
+      <a href="file://{{requirement.md の絶対パス}}">requirement.md</a>
+      <a href="file://{{spec.md の絶対パス}}">spec.md</a>
+      <a href="file://{{task.md の絶対パス}}">task.md</a>
+      <a href="file://{{testcase.md の絶対パス}}">testcase.md</a>
+      <a href="file://{{followup.md の絶対パス}}">followup.md</a>
+      <a href="file://{{decisions.md の絶対パス}}">decisions.md</a>
+    </div>
+  </figure>
+
+  <h2>2. 変更前 → 変更後（{{画面 / API / バッチ}}）</h2>
+  <p>{{どの画面・処理か。変更前に何が困っていたかを1文}}</p>
+  <!-- 画面が変わる場合: 変更前・変更後を簡易に再現し、変わった部分を .newmark で囲む（.tag に「上に移動」「見出しごと消える」のような変化の名前）。
+       表示が分岐するデータ（回答あり / なし 等）があれば、状態ごとに「変更前 / 変更後」の組を縦に重ねる（.compare は2列グリッド）。
+       表示値は実データと実際の整形関数の出力にそろえる。
+       画面が無い場合: API の入出力や処理の違いを表または <pre> で並べる。 -->
+  <div class="compare">
+    <div class="screen">
+      <div class="screen-title">変更前（{{状態}}）</div>
+      <div class="tabs"><span>{{タブ}}</span><span class="active">{{タブ}}</span></div>
+      <div class="sec-head">{{見出し}}</div>
+      <div class="placeholder">{{変わらない部分}}</div>
+      <div class="gap">{{50px}}</div>
+      <div class="sec-head">{{見出し}}</div>
+      <div class="placeholder">{{変更前にあった表示}}</div>
+    </div>
+    <div class="screen">
+      <div class="screen-title">変更後（{{状態}}）</div>
+      <div class="tabs"><span>{{タブ}}</span><span class="active">{{タブ}}</span></div>
+      <div class="newmark"><span class="tag">{{変化の名前}}</span>
+        <div class="sec-head">{{見出し}}</div>
+        <div class="placeholder">{{変更後の表示}}</div>
+      </div>
+    </div>
+  </div>
+  <p class="meta">{{表示に使った実データの id、日付表示の基準日。確認 URL は「6. 手で確認するもの」}}</p>
+
+  <h2>3. 変更の地図（どこを触ったか）</h2>
+  <figure>
+    <figcaption>図2　{{触ったのは画面（FE）の2ファイルだけ。クエリ・API・DB は既存のまま}}</figcaption>
+    <div class="legend"><span class="l-new">新規</span><span class="l-changed">変更</span><span class="l-existing">既存（変更なし）</span></div>
+    <div class="figscroll">
+    <!-- 3レーン（画面 FE / API BE / DB）。ノードは階段状に置く（FE の右端 → 下の BE → 下の DB）と線が交差しない。
+         ノードの1行目は日本語の役割、2行目はファイル名・フィールド名・テーブル名。長い名前が収まらなければ2行目を「変更なし・位置が下へ移るだけ」のような役割の補足にし、名前は本文の表に逃がす。
+         BE・DB を触らない変更でもレーンは消さない（「触っていない」ことが一目で分かるのが目的）。
+         ノード高さ 60、タイトル y+23、サブ y+45。エッジラベルは線の中点に下地（edge-bg）を敷く -->
+    <svg viewBox="0 0 980 330" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="画面からDBまでの経路と変更箇所">
+      <defs>
+        <marker id="arw2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <rect class="lane" x="0" y="0" width="980" height="104" rx="6"/>
+      <rect class="lane" x="0" y="110" width="980" height="104" rx="6"/>
+      <rect class="lane" x="0" y="220" width="980" height="104" rx="6"/>
+      <text x="16" y="56" class="t-lane">画面（FE）</text>
+      <text x="16" y="166" class="t-lane">API（BE）</text>
+      <text x="16" y="276" class="t-lane">DB</text>
+
+      <path class="edge" d="M310,52 H370" marker-end="url(#arw2)"/>
+      <path class="edge" d="M670,52 H700" marker-end="url(#arw2)"/>
+      <path class="edge" d="M520,82 V132" marker-end="url(#arw2)"/>
+      <path class="edge" d="M520,192 V242" marker-end="url(#arw2)"/>
+      <rect class="edge-bg" x="432" y="96" width="176" height="22" rx="4"/>
+      <text x="520" y="112" text-anchor="middle" class="t-edge">{{GraphQL query（既存のまま）}}</text>
+      <rect class="edge-bg" x="470" y="206" width="100" height="22" rx="4"/>
+      <text x="520" y="222" text-anchor="middle" class="t-edge">{{has_one}}</text>
+
+      <g class="node n-changed"><rect x="110" y="22" width="200" height="60" rx="8"/>
+        <text x="210" y="45" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="210" y="67" text-anchor="middle" class="t-sub">{{ファイル名（何を変えたか）}}</text></g>
+      <g class="node n-changed"><rect x="370" y="22" width="300" height="60" rx="8"/>
+        <text x="520" y="45" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="520" y="67" text-anchor="middle" class="t-sub">{{ファイル名}}</text></g>
+      <g class="node n-existing"><rect x="700" y="22" width="270" height="60" rx="8"/>
+        <text x="835" y="45" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="835" y="67" text-anchor="middle" class="t-sub">{{変更なし・位置が下へ移るだけ}}</text></g>
+      <g class="node n-existing"><rect x="370" y="132" width="300" height="60" rx="8"/>
+        <text x="520" y="155" text-anchor="middle" class="t-title">{{役割}}</text>
+        <text x="520" y="177" text-anchor="middle" class="t-sub">{{フィールド・リゾルバ名}}</text></g>
+      <g class="node n-existing"><rect x="370" y="242" width="300" height="60" rx="8"/>
+        <text x="520" y="265" text-anchor="middle" class="t-title">{{テーブル名}}</text>
+        <text x="520" y="287" text-anchor="middle" class="t-sub">{{制約（最大1件 など）}}</text></g>
+    </svg>
+    </div>
+    <div class="confirm">
+      <b>ここで確定すること</b>
+      {{何をどこへ移した・足した・消したかを2〜3文。クエリ本数・codegen の要否・新規ファイル名}}
+    </div>
+  </figure>
+
+  <!-- 複数タスクがあり依存関係があるとき（TASK-003 → TASK-005 など）は、ここに「図 タスクの依存」を足す。
+       左→右の DAG で、依存の無いタスクを左列に置き、矢印は右へだけ向ける。1タスクだけなら省く。 -->
+
+  <figure>
+    <figcaption>図3　{{1つの入力が条件ごとにどう描画・処理されるか}}</figcaption>
+    <div class="figscroll">
+    <!-- 分岐フロー。左に1ノード、右に分岐先を縦に並べる。行き先が同じ線は1ノードへ集約し、区別はエッジのラベルで表す。
+         分岐の折れ点は x=330〜370（線ごとにずらす）、ラベルは x=480 に下地つき。分岐ラベルに D-n を添えると、どの仮確定が効いているかが線上で分かる。
+         spec の「処理フローと状態遷移」の表から起こす -->
+    <svg viewBox="0 0 980 240" preserveAspectRatio="xMidYMid meet" width="100%" role="img" aria-label="条件ごとの出し分け">
+      <defs>
+        <marker id="arw3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+        </marker>
+      </defs>
+      <path class="edge" d="M250,120 H330 V30 H600" marker-end="url(#arw3)"/>
+      <path class="edge" d="M250,120 H350 V60 H600" marker-end="url(#arw3)"/>
+      <path class="edge" d="M250,120 H370 V130 H600" marker-end="url(#arw3)"/>
+      <path class="edge" d="M250,120 H330 V200 H600" marker-end="url(#arw3)"/>
+      <rect class="edge-bg" x="380" y="19" width="200" height="22" rx="4"/>
+      <text x="480" y="35" text-anchor="middle" class="t-edge">{{条件 D-n}}</text>
+      <rect class="edge-bg" x="420" y="49" width="120" height="22" rx="4"/>
+      <text x="480" y="65" text-anchor="middle" class="t-edge">{{条件}}</text>
+      <rect class="edge-bg" x="420" y="119" width="120" height="22" rx="4"/>
+      <text x="480" y="135" text-anchor="middle" class="t-edge">{{条件}}</text>
+      <rect class="edge-bg" x="380" y="189" width="200" height="22" rx="4"/>
+      <text x="480" y="205" text-anchor="middle" class="t-edge">{{条件 D-n}}</text>
+      <g class="node n-existing"><rect x="10" y="90" width="240" height="60" rx="8"/>
+        <text x="130" y="113" text-anchor="middle" class="t-title">{{入力}}</text>
+        <text x="130" y="135" text-anchor="middle" class="t-sub">{{補足}}</text></g>
+      <g class="node n-changed"><rect x="600" y="10" width="370" height="80" rx="8"/>
+        <text x="785" y="43" text-anchor="middle" class="t-title">{{結果1}}</text>
+        <text x="785" y="67" text-anchor="middle" class="t-sub">{{補足}}</text></g>
+      <g class="node n-changed"><rect x="600" y="100" width="370" height="60" rx="8"/>
+        <text x="785" y="123" text-anchor="middle" class="t-title">{{結果2}}</text>
+        <text x="785" y="145" text-anchor="middle" class="t-sub">{{補足}}</text></g>
+      <g class="node n-changed"><rect x="600" y="170" width="370" height="60" rx="8"/>
+        <text x="785" y="193" text-anchor="middle" class="t-title">{{結果3}}</text>
+        <text x="785" y="215" text-anchor="middle" class="t-sub">{{補足}}</text></g>
+    </svg>
+    </div>
+    <div class="confirm">
+      <b>ここで確定すること（{{どの DB}}・{{YYYY-MM-DD}}）</b>
+      {{各分岐を通るデータの件数（testcase.md の手動確認用データ、または test-prep の投入データ）。今のデータで通らない分岐があればそう書く。到達しない分岐は「無い」と書く。本番の件数は未確認ならそう書く}}
+    </div>
+  </figure>
+
+  <h2>4. 勝手に決めたこと（仮確定 {{N}}件・手戻りの大きい順）</h2>
+  <p>各カードの帯は、覆したときにやり直す工程。番号で「D-n は別案で」と言えば、その工程から再実行する。</p>
+
+  <!-- decisions.md の「仮確定一覧」を1行1カードにする。順序は decisions.md のまま（⚠️ → 手戻りコストの大きい順）。
+       .dcard warn = ⚠️ 付き、または記録上未合意の相手がいるもの。.kind k-warn のバッジに理由（「人の合意が要る」「本番データに触れる」）。
+       帯（.strip）は 要件 / 設計 / タスク / テスト / 実装 の5つ固定で、「覆った場合の手戻り」に出てくる工程・文書に .redo を付ける
+       （FR-nnn → 要件、spec のセクション → 設計、TASK → タスク、TC → テスト、ファイル名 → 実装）。
+       .what は「覆った場合の手戻り」の本文を1行に -->
+  <div class="dcard warn">
+    <div class="head"><span class="id">D-{{n}}</span><span class="kind k-d">{{工程}} {{由来 C-1 / P-3}}</span><span class="kind k-warn">{{人の合意が要る}}</span></div>
+    <div class="q">{{論点}}</div>
+    <div class="pick">{{採用案}}</div>
+    <div class="why">{{根拠。コード・一次情報・既存実装のどれに基づいたか。代償があれば「代償:」で}}</div>
+    <div class="redo"><span class="lbl">覆したら</span><span class="strip"><span class="redo">要件</span><span>設計</span><span>タスク</span><span class="redo">テスト</span><span class="redo">実装</span></span><span class="what">{{覆った場合の手戻り}}</span></div>
+  </div>
+
+  <div class="dcard">
+    <div class="head"><span class="id">D-{{n}}</span><span class="kind k-d">{{工程}} {{由来}}</span></div>
+    <div class="q">{{論点}}</div>
+    <div class="pick">{{採用案}}</div>
+    <div class="why">{{根拠}}</div>
+    <div class="redo"><span class="lbl">覆したら</span><span class="strip"><span>要件</span><span>設計</span><span>タスク</span><span>テスト</span><span class="redo">実装</span></span><span class="what">{{覆った場合の手戻り}}</span></div>
+  </div>
+
+  <!-- 覆った仮確定・停止した論点が無ければ1行。あれば decisions.md の表をそのまま .table-wrap の表にする -->
+  <p class="meta">覆った仮確定: {{なし}}　／　停止した論点: {{なし}}</p>
+
+  <h2>5. 要件がどこで担保されているか</h2>
+  <!-- 自動 / 手動の件数は testcase.md の種別から数える。幅は件数の比率 -->
+  <div class="bar">
+    <div class="auto" style="width:{{自動の割合}}%">自動テスト {{N}}件</div>
+    <div class="manual" style="width:{{手動の割合}}%">手動確認 {{N}}件</div>
+  </div>
+  <!-- 行 = requirement.md の FR-nnn と非機能要件・エラー時挙動。列 = 効いている D-n、自動の TC、手動の TC。
+       task.md と testcase.md の「要件カバレッジ」を突き合わせて作る。担保の無い行は「—」にして、無いことが見えるようにする -->
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>要件</th><th>決めたこと</th><th>自動テスト</th><th>手動確認</th></tr></thead>
+    <tbody>
+      <tr><td><b>FR-001</b> {{要件を短く}}</td><td><span class="kind k-warn">D-1</span></td><td class="n">—</td><td><span class="kind k-manual">TC-101</span></td></tr>
+      <tr><td><b>FR-002</b> {{要件}}</td><td></td><td><span class="kind k-auto">TC-001</span></td><td><span class="kind k-manual">TC-101</span></td></tr>
+      <tr><td>非機能: {{クエリ本数・スキーマ不変}}</td><td></td><td class="n">—</td><td><span class="kind k-manual">TC-402</span> {{＋ git status で生成物に差分なし}}</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>テストの観点（どこを見て、どこを見ないか）</h3>
+  <!-- testcase.md の「テスト観点マトリクス」をそのまま。○ は .hit、− は .miss で欄外の注記（※n）を .why に短く入れる -->
+  <div class="table-wrap">
+  <table class="matrix">
+    <thead><tr><th>対象</th><th>正常</th><th>異常</th><th>境界</th><th>権限</th><th>状態遷移</th><th>表示</th><th>回帰</th></tr></thead>
+    <tbody>
+      <tr><td class="hd">{{対象}}</td><td class="hit">○</td><td class="hit">○</td><td class="miss">−<span class="why">{{理由}}</span></td><td class="miss">−</td><td class="hit">○</td><td class="hit">○</td><td class="hit">○</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="meta">到達しないので扱わない: {{spec・testcase に根拠つきで列挙された状態を、根拠を括弧で添えて並べる}}</p>
+
+  <h2>6. 手で確認するもの（dev サーバー起動後）</h2>
+  <p class="meta">{{起動コマンド}}のあと <code>just hosts</code> でプレフィックスを確認。{{必要なロール}}</p>
+  <!-- task.md の「手動確認」から。URL はそのままブラウザに貼れるフルパス（実ID入り）。観点は1行 -->
+  <ul class="urls">
+    <li><b>M-1 {{データの状態}}:</b> {{観点を1行}}<br><a href="{{URL}}">{{URL}}</a></li>
+  </ul>
+
+  <h2>7. 気づいたが直していないこと</h2>
+  <!-- followup.md の改善提案・規約候補・要確認を1件1行。見出しを太字にして、何が・なぜ・範囲外なら範囲外と -->
+  <ul class="facts">
+    <li><b>{{見出し}}:</b> {{内容。issue の範囲外ならそう書く（followup.md）}}</li>
+    <li><b>規約の候補:</b> {{内容と追加先の候補（followup.md）}}</li>
+  </ul>
+
+  <h2>根拠</h2>
+  <p class="meta">
+    この地図は{{決定ログ・要件定義書 v1.2・技術設計書・タスクリスト・テストケース・実装メモの6文書}}（図1のリンク）から作成。件数は{{どの DB、YYYY-MM-DD}}。本番の件数は{{未確認}}。
+  </p>
+</main>
+</body>
+</html>
